@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in • Neuralux</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #121212;
+      --muted: #6c757d;
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --card: #0f1724;
+      --text: #e6eef8;
+      --muted: #9aa6b2;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+    [data-theme="dark"] .auth-card {
+      background: #101824;
+    }
+    .auth-side {
+      background: linear-gradient(180deg, #6366f1, #3b82f6);
+      color: white;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .auth-form {
+      padding: 40px;
+    }
+    @media (max-width: 768px) {
+      .auth-card {
+        grid-template-columns: 1fr;
+      }
+      .auth-side {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <div class="auth-card">
+    <!-- Left Side -->
+    <div class="auth-side">
+      <h2>Welcome to Neuralux</h2>
+      <p>Log in or create your account to start chatting with AI.</p>
+    </div>
+
+    <!-- Right Side -->
+    <div class="auth-form">
+      <ul class="nav nav-tabs" id="authTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-pane" type="button" role="tab">Login</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup-pane" type="button" role="tab">Register</button>
+        </li>
+      </ul>
+
+      <div class="tab-content mt-3">
+        <!-- Login -->
+        <div class="tab-pane fade show active" id="login-pane" role="tabpanel">
+          <form id="login-form">
+            <div class="mb-3">
+              <label>Email</label>
+              <input id="login-email" type="email" class="form-control" placeholder="you@example.com" required />
+            </div>
+            <div class="mb-3">
+              <label>Password</label>
+              <input id="login-password" type="password" class="form-control" placeholder="••••••••" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+          </form>
+
+          <div class="text-center my-3">or</div>
+          <button id="google-btn" class="btn btn-outline-secondary w-100">
+            <img src="https://www.svgrepo.com/show/355037/google.svg" width="20" class="me-2"> Sign in with Google
+          </button>
+        </div>
+
+        <!-- Register -->
+        <div class="tab-pane fade" id="signup-pane" role="tabpanel">
+          <form id="signup-form">
+            <div class="mb-3">
+              <label>Full name</label>
+              <input id="signup-name" type="text" class="form-control" placeholder="Your name" required />
+            </div>
+            <div class="mb-3">
+              <label>Email</label>
+              <input id="signup-email" type="email" class="form-control" placeholder="you@example.com" required />
+            </div>
+            <div class="mb-3">
+              <label>Password</label>
+              <input id="signup-password" type="password" class="form-control" placeholder="••••••••" required />
+            </div>
+            <button type="submit" class="btn btn-success w-100">Create account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Supabase Auth -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const SUPABASE_URL = 'https://kqqncomprklpbjopisyq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxcW5jb21wcmtscGJqb3Bpc3lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4NDI1NTUsImV4cCI6MjA3NjQxODU1NX0.D2pwvInFXMAAdyRQ2j1u1TwaNWHED8jVJraI8UKmXYs'
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    const redirectAfterAuth = '/dashboard.html'
+
+    // Sign up (email + password + name)
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const name = document.getElementById('signup-name').value.trim()
+      const email = document.getElementById('signup-email').value.trim()
+      const password = document.getElementById('signup-password').value
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name } // ✅ store name in user_metadata
+        }
+      })
+
+      if (error) {
+        alert('Sign up error: ' + error.message)
+        return
+      }
+
+      if (data.user) {
+        alert('Account created successfully!')
+        window.location.href = redirectAfterAuth
+      } else {
+        alert('Check your email for a confirmation link.')
+      }
+    })
+
+    // Login (email + password)
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const email = document.getElementById('login-email').value.trim()
+      const password = document.getElementById('login-password').value
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        alert('Login error: ' + error.message)
+        return
+      }
+
+      if (data.session) {
+        window.location.href = redirectAfterAuth
+      }
+    })
+
+    // Google Sign-In
+    document.getElementById('google-btn').addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + redirectAfterAuth
+        }
+      })
+    })
+
+    // Auto redirect if already logged in
+    ;(async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        window.location.href = redirectAfterAuth
+      }
+    })()
+  </script>
+</body>
+</html>
